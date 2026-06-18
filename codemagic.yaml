@@ -6,10 +6,10 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.ewpremierrides.app
-      app_store_connect:
-        use_default_credentials: true
       node: 18.17.0
       xcode: latest
+    integrations:
+      app_store_connect: Codemagic
     scripts:
       - name: Install Capacitor CLI
         script: |
@@ -63,7 +63,6 @@ workflows:
 
     publishing:
       app_store_connect:
-        auth: integration
         submit_to_testflight: true
         beta_groups:
           - Internal Testers
