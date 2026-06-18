@@ -46,25 +46,8 @@ workflows:
           npx cap add ios
           npx cap sync ios
 
-      - name: Set up code signing
-        script: xcode-project use-profiles
-
-      - name: Build IPA
+      - name: Create exportOptions.plist
         script: |
-          xcodebuild -workspace ios/App/App.xcworkspace \
-            -scheme App \
-            -configuration Release \
-            -archivePath build/App.xcarchive \
-            archive
-
-          xcodebuild -exportArchive \
-            -archivePath build/App.xcarchive \
-            -exportOptionsPlist ios/App/exportOptions.plist \
-            -exportPath build/ios/ipa
-
-      - name: Create exportOptions.plist if missing
-        script: |
-          mkdir -p ios/App
           cat > ios/App/exportOptions.plist << 'PLIST'
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -74,6 +57,8 @@ workflows:
             <string>app-store</string>
             <key>teamID</key>
             <string>W5LLQF9YHT</string>
+            <key>signingStyle</key>
+            <string>automatic</string>
             <key>uploadBitcode</key>
             <false/>
             <key>uploadSymbols</key>
@@ -81,6 +66,28 @@ workflows:
           </dict>
           </plist>
           PLIST
+
+      - name: Set up code signing
+        script: xcode-project use-profiles
+
+      - name: Build IPA
+        script: |
+          mkdir -p build/ios/ipa
+
+          xcodebuild -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -archivePath build/App.xcarchive \
+            -allowProvisioningUpdates \
+            CODE_SIGN_STYLE=Automatic \
+            DEVELOPMENT_TEAM=W5LLQF9YHT \
+            archive
+
+          xcodebuild -exportArchive \
+            -archivePath build/App.xcarchive \
+            -exportOptionsPlist ios/App/exportOptions.plist \
+            -exportPath build/ios/ipa \
+            -allowProvisioningUpdates
 
     artifacts:
       - build/ios/ipa/*.ipa
