@@ -9,7 +9,7 @@ workflows:
       node: 18.17.0
       xcode: latest
     integrations:
-      app_store_connect: Codemagic
+      app_store_connect: Premier Rides Key
     scripts:
       - name: Install Capacitor CLI
         script: |
@@ -63,6 +63,7 @@ workflows:
 
     publishing:
       app_store_connect:
+        auth: integration
         submit_to_testflight: true
         beta_groups:
           - Internal Testers
