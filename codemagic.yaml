@@ -53,8 +53,7 @@ workflows:
         script: |
           xcode-project build-ipa \
             --workspace ios/App/App.xcworkspace \
-            --scheme App \
-            --export-options-plist /usr/local/share/xcode-project/export_options.plist
+            --scheme App
 
     artifacts:
       - build/ios/ipa/*.ipa
