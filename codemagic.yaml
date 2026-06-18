@@ -6,6 +6,7 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.ewpremierrides.app
+        provisioning_profile: Premier_rides_app_store
       vars:
         XCODE_WORKSPACE: "ios/App/App.xcworkspace"
         XCODE_SCHEME: "App"
@@ -13,7 +14,7 @@ workflows:
       - name: Install dependencies
         script: npm install
       - name: Build web app
-        script: npm run build
+        script: npx vite build
       - name: Install Capacitor
         script: |
           npm install @capacitor/core @capacitor/ios @capacitor/cli
