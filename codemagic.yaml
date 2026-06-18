@@ -7,30 +7,27 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.ewpremierrides.app
       node: 18.17.0
+      xcode: latest
     scripts:
-      - name: Install Node dependencies
+      - name: Install Capacitor CLI
         script: |
           npm install -g @capacitor/cli
-          npm install @capacitor/core @capacitor/ios @capacitor/app @capacitor/haptics @capacitor/keyboard @capacitor/status-bar
 
       - name: Create Capacitor project wrapping live app
         script: |
-          # Create a minimal package.json
-          cat > package.json << 'EOF'
+          cat > package.json << 'PKGJSON'
           {
             "name": "premier-rides",
             "version": "1.0.0",
-            "description": "Premier Rides",
             "dependencies": {
               "@capacitor/core": "^6.0.0",
               "@capacitor/ios": "^6.0.0",
               "@capacitor/cli": "^6.0.0"
             }
           }
-          EOF
+          PKGJSON
 
-          # Create capacitor config pointing to live URL
-          cat > capacitor.config.json << 'EOF'
+          cat > capacitor.config.json << 'CAPJSON'
           {
             "appId": "com.ewpremierrides.app",
             "appName": "Premier Rides",
@@ -40,9 +37,8 @@ workflows:
               "cleartext": false
             }
           }
-          EOF
+          CAPJSON
 
-          # Create minimal www/index.html so Capacitor doesn't complain
           mkdir -p www
           echo '<html><body>Loading...</body></html>' > www/index.html
 
@@ -55,10 +51,38 @@ workflows:
 
       - name: Build IPA
         script: |
-          xcode-build-and-archive \
-            -workspace ios/App/App.xcworkspace \
-            -scheme App
+          xcodebuild -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -archivePath build/App.xcarchive \
+            archive
+
+          xcodebuild -exportArchive \
+            -archivePath build/App.xcarchive \
+            -exportOptionsPlist ios/App/exportOptions.plist \
+            -exportPath build/ios/ipa
+
+      - name: Create exportOptions.plist if missing
+        script: |
+          mkdir -p ios/App
+          cat > ios/App/exportOptions.plist << 'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store</string>
+            <key>teamID</key>
+            <string>W5LLQF9YHT</string>
+            <key>uploadBitcode</key>
+            <false/>
+            <key>uploadSymbols</key>
+            <true/>
+          </dict>
+          </plist>
+          PLIST
 
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
+      - build/App.xcarchive
