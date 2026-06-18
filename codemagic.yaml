@@ -6,7 +6,6 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.ewpremierrides.app
-        provisioning_profile: Premier_rides_app_store
       vars:
         XCODE_WORKSPACE: "ios/App/App.xcworkspace"
         XCODE_SCHEME: "App"
